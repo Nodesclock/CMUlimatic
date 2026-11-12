@@ -1,45 +1,41 @@
-# CMUlimatic:
+# CMUlimatic
 
-**A Brython Lockdown Sandbox Escape in CMU CS Academy**
+**A Brython lockdown bypass in the CMU CS Academy Python runner.**
 
-CMUlimatic is an application-level sandbox escape discovered in the Brython-based Python execution environment used by [CMU CS Academy](https://academy.cs.cmu.edu).
+CMUlimatic documents an interpreter isolation weakness in [CMU CS Academy](https://academy.cs.cmu.edu). The web IDE uses a modified [Brython](https://github.com/cmu-cs-academy/brython) runtime to run student Python inside a JavaScript Web Worker. Research into its `$B.lockdown` restrictions found a route from permitted Python objects to JavaScript features that the restricted interface was intended to hide.
 
-CMUlimatic allows restricted student Python code to bypass the interpreter's lockdown protections and access JavaScript capabilities in the browser's Web Worker environment.
+## Overview
 
-## Vulnerability Overview:
-
-| Property | Details |
+| Field | Details |
 |---|---|
-| **Affected platform** | CMU CS Academy (Web IDE) |
-| **Affected component** | Brython fork maintained by CMU |
-| **Vulnerability type** | Interpreter Sandbox Escape |
-| **CWE** | CWE-693 (Protection Mechanism Failure) |
-| **Severity** | N/A |
-| **CVE** | N/A |
-| **Status** | Mostly reproduced, disclosure is still pending |
+| Affected component | [CMU CS Academy Brython fork](https://github.com/cmu-cs-academy/brython) |
+| Observed environment | CS Academy `/ide` student code runner |
+| Vulnerability | Application level interpreter isolation bypass |
+| CWE | CWE-693, provisional |
+| CVE | Not assigned |
+| Severity | Under assessment |
+| Status | Research documented, coordinated disclosure pending |
 
-## Research & Validation:
+## Findings
 
-The vulnerability was identified through AI-assisted security research and reproduced against the public Brython source code.
+Local reproductions and reported tests in the production IDE indicate that restricted Python can reach the Web Worker global object. Follow up checks observed standard worker features including public network requests, page output messaging, dynamic script loading, and synthetic IndexedDB operations.
 
-Testing was performed, confirmed the lockdown bypass in CS Academy's production IDE, including access to worker-global JavaScript capabilities, network requests, and worker-to-page messaging.
+The available results **do not demonstrate** account takeover, access to other students' records, stolen authentication tokens, persistent grade changes, or server side code execution. The browser's own security sandbox was not bypassed.
 
-No malicious testing was preformed.
+The underlying source analysis is documented in [Root Cause](research/root-cause.md). See [Validation Results](research/validation-results.md) for the test evidence and its limitations, and [Impact Assessment](advisory/impact-assessment.md) for what remains unverified.
 
-## Responsible Disclosure:
+## Repository
 
-This research is being prepared for coordinated disclosure to Carnegie Mellon University's security team.
+The [Technical Report](advisory/technical-report.md) describes the issue and potential fixes. [Affected Versions](research/affected-versions.md) separates the reviewed source from observed production assets. [Patch Notes](patches/README.md) explain why an unverified diff has not been included.
 
-Technical reproduction details and supporting evidence will be published following remediation and disclosure coordination.
+## Disclosure and credits
 
-## Credits:
+This is an independent research project. Technical reproduction material is being held for coordinated disclosure with Carnegie Mellon University. The project is not affiliated with or endorsed by CMU.
 
-**Discovered and researched by:** [Nodesclock](https://github.com/Nodesclock)
+**Researcher and repository author:** [Nodesclock](https://github.com/Nodesclock)
 
-**AI models used:** Deepseek v4.1 Flash, Yandex Alice, ChatGPT 6 Astra.
+AI assisted tools supported parts of the analysis and documentation. The technical claims are limited to what the available source material and reported test results support.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). The license applies only to original research materials and code created for this project.
-
-*CMUlimatic is an independent security research project and is not affiliated with, sponsored by, or endorsed by Carnegie Mellon University.*
+Original project material is available under the [MIT License](LICENSE). Third party source code retains its own license.
