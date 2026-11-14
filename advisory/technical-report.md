@@ -1,49 +1,51 @@
 # CMUlimatic Technical Report
 
-> **Evidence notice:** This report summarizes source inspection, local reproductions, and reported tests in the production IDE. Original browser captures, complete test harnesses, full asset hashes, and the candidate patch diff are not included. The reported outcomes require primary record verification before public release.
+> **Evidence notice:** This report draws on source inspection, local reproduction records, and reported production IDE tests. I have not included the original browser captures, complete harnesses, full asset hashes, or the candidate patch diff. Those artifacts are still needed to independently verify the reported results.
 
 ## Summary
 
-CMU CS Academy runs student Python in a JavaScript Web Worker using a modified Brython runtime. Its `$B.lockdown` setting limits selected imports and evaluation paths. The reported weakness is in native JavaScript property resolution. Permitted Python objects can expose JavaScript prototype properties even while lockdown is enabled.
+In this report, I examine the `$B.lockdown` restrictions in the modified Brython runtime used by CMU CS Academy. Student Python executes in a JavaScript Web Worker. Lockdown limits selected imports and evaluation paths, but the source review identified native JavaScript property resolution that can expose prototype properties on otherwise permitted Python objects.
 
-That access can lead to the Web Worker global object and APIs outside the intended restricted Python interface. The issue crosses an **application level interpreter boundary**, not the browser or operating system sandbox. It is not remote code execution on CMU servers.
+That access can reach the worker's global object and APIs outside the intended restricted Python interface. This is an **application-level interpreter isolation bypass**, not an escape from the browser or operating system sandbox. It does not establish code execution on CMU servers.
 
 ## Affected software
 
-The reviewed source is [CMU's Brython fork](https://github.com/cmu-cs-academy/brython) at commit `e516a010adde1bfdbc3f1775610f93026d3f0568`. The reported production interpreter asset is `static/js/cmu-graphics.f1e1dd70.js` in the `/ide` code runner.
+I focused on [CMU's Brython fork](https://github.com/cmu-cs-academy/brython) at commit `e516a010adde1bfdbc3f1775610f93026d3f0568`. The reported production interpreter asset is `static/js/cmu-graphics.f1e1dd70.js` in the `/ide` code runner.
 
-Two frontend assets, `main.13958e42.js` and `main.e2956417.js`, also appear in the research records. They are application frontend bundles, not the interpreter asset. A frontend filename change alone is not evidence that the interpreter weakness was fixed. Neither the first affected release nor the current deployed status has been established. See [Affected Versions](../research/affected-versions.md).
+The research records also identify two application frontend bundles, `main.13958e42.js` and `main.e2956417.js`. Their names alone cannot establish whether the interpreter issue was fixed. I have not established the first affected release or the status of the current deployment. See [Affected Versions](../research/affected-versions.md).
 
 ## Root cause
 
-The source review found that lockdown checks operate at selected import and evaluation entry points while native backed object lookup can still resolve underlying JavaScript properties. A permitted Python module can therefore expose prototype linked JavaScript functionality and lead to the worker's `globalThis`.
+My review points to a gap between lockdown's import and evaluation checks and the lower-level attribute resolution logic. Native-backed objects can expose underlying JavaScript properties, allowing a permitted Python module to provide a path to the worker's `globalThis`.
 
-Other reported paths involve `sys.modules`, dotted imports, `importlib`, and the interpreter's `__BRYTHON__` reference. An alternative compiled code route produced conflicting results between local test environments and remains unresolved. These paths are treated as related behavior rather than automatically as separate CVEs.
+Related paths reported in the research involve `sys.modules`, dotted imports, `importlib`, and the interpreter's `__BRYTHON__` reference. A proposed compiled-code route behaved differently across local environments, so I am leaving that route unresolved rather than treating it as confirmed everywhere.
 
-The source locations and mechanism are described in [Root Cause](../research/root-cause.md).
+I describe the source locations and mechanism in [Root Cause](../research/root-cause.md).
 
 ## Validation
 
-Separate local test environments reportedly reproduced the primary module based escape against the pinned source revision with lockdown enabled. A controlled production IDE test reportedly reproduced worker global access. Additional checks examined ordinary Web Worker capabilities and limitations.
+Two separate local environments reportedly reproduced the primary module-based escape against the examined Brython revision with lockdown enabled. A controlled production IDE test also reportedly reached the worker global object. I have not independently verified the original browser transcripts.
 
-The results cover worker messaging, requests for public resources, script loading, synthetic IndexedDB access, WebSocket constructor access, and the absence of direct main page storage or DOM access. Original test artifacts have not yet been attached. [Validation Results](../research/validation-results.md) distinguishes observations from claims that were not tested.
+The recorded follow-up checks cover worker messaging, public resource requests, inert script loading, synthetic IndexedDB access, WebSocket constructor availability, and the absence of direct access to the main page's storage and DOM. See [Validation Results](../research/validation-results.md) for the full breakdown and the missing evidence.
 
 ## Security impact
 
-The evidence supports an interpreter restriction bypass inside a browser Web Worker. It does not show access to protected backend records, teacher account compromise, authentication token theft, stored grade modification, or browser level privilege escalation.
+I consider the interpreter restriction bypass the core finding. The material available to me does not show access to protected backend records, teacher account compromise, stolen authentication tokens, persistent grade modification, or browser-level privilege escalation.
 
-The effect on trusted page handlers and grading authority is unresolved. Those questions matter more to severity than the availability of standard worker APIs. No final CVSS score is assigned. See [Impact Assessment](impact-assessment.md).
+The behavior of privileged page message handlers and the backend's grading authority remains unverified. I have therefore not assigned a numerical CVSS score. See [Impact Assessment](impact-assessment.md).
 
 ## Remediation considerations
 
-1. Enforce lockdown restrictions when native JavaScript properties are resolved, not only when import or evaluation syntax is checked.
-2. Restrict access to interpreter internals and preloaded browser bridge modules without breaking normal Python module behavior.
-3. Treat every worker message as untrusted. Allow only expected message types and validate their contents before trusted page handlers act on them.
-4. Evaluate stronger execution isolation, such as a dedicated origin or an appropriately sandboxed frame that creates its own worker. A `blob:` worker in the main page does not provide an independent origin.
-5. Ensure recorded grades or progress affecting other users are authorized and verified by the server.
+Based on the reported mechanism, I recommend that CMU:
 
-The proposed A–G interpreter changes were reported to pass local regression tests. The actual tested diff and regression output were not provided, so these remain **candidate mitigations**, not a verified complete fix. See [Patch Notes](../patches/README.md).
+1. Apply lockdown restrictions during native JavaScript property resolution, not only during import and evaluation checks.
+2. Restrict interpreter internals and preloaded browser bridge modules without breaking normal Python behavior.
+3. Validate worker message types and payloads before they reach trusted page handlers.
+4. Consider a dedicated security origin or an appropriately sandboxed frame that creates its own worker. A `blob:` worker created on the main page does not provide a separate origin.
+5. Ensure stored grades and progress updates are independently authorized and verified on the server.
+
+The research records describe candidate interpreter changes labeled A through G. They reportedly passed local regression tests, but I have not received the exact tested diff or regression output. I am treating them as **candidate mitigations**, not a verified production fix. See [Patch Notes](../patches/README.md).
 
 ## Research boundaries
 
-The evidence includes local harness experiments, reported production IDE checks, and separate earlier backend probes. These activities should remain distinct in any private vendor submission. No cross user compromise or privileged backend operation is claimed.
+I've kept local harness experiments, reported production IDE checks, and earlier backend probes separate in this assessment. I do not claim cross-user compromise or privileged backend access.
