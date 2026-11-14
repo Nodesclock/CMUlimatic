@@ -35,9 +35,9 @@ I'm keeping complete reproduction material out of this repository while preparin
 AI was heavily used for reproducing some parts of the vulnerability, testing, and writting many sections of this write-up.
 
 AI models used: 
-- Astra 6 (High)
-- DeepSeek V4.1
-- Yandex Alice
+- Astra 6 (Verified and wrote sections of this write-up)
+- DeepSeek V4.1 (Main tester and reproduced some parts of the vulnerability)
+- Yandex Alice (General help and reviewed everything)
 
 ## License:
 
