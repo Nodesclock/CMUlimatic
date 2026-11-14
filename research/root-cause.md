@@ -2,37 +2,37 @@
 
 ## Intended boundary
 
-The CMU CS Academy Brython fork uses `$B.lockdown` to restrict JavaScript interfaces available to student Python. In the reported `/ide` execution path, Python runs in a browser Web Worker and should not reach the worker's underlying JavaScript global object through normal permitted Python operations.
+I examined how CMU CS Academy's Brython fork uses `$B.lockdown` to restrict JavaScript interfaces exposed to student Python. In the reported `/ide` execution path, Python runs inside a browser Web Worker. Permitted Python operations should not provide an unintended route to the underlying JavaScript global object.
 
 ## Native property access
 
-The reviewed revision is [`e516a010adde1bfdbc3f1775610f93026d3f0568`](https://github.com/cmu-cs-academy/brython/commit/e516a010adde1bfdbc3f1775610f93026d3f0568).
+I focused on source revision [`e516a010adde1bfdbc3f1775610f93026d3f0568`](https://github.com/cmu-cs-academy/brython/commit/e516a010adde1bfdbc3f1775610f93026d3f0568).
 
-The research identified native backed object lookup paths where a Python attribute resolves to a property on an underlying JavaScript object or its prototype chain. The interpreter's lockdown checks did not consistently apply to those lookups.
+My source review identified native-backed attribute lookup paths where a Python attribute can resolve to a property on an underlying JavaScript object or its prototype chain. The reported lockdown checks do not consistently apply to those lookups.
 
-A permitted Python module therefore reportedly provides a route from ordinary attribute access to the JavaScript `Function` constructor and then to the worker global scope. The issue is that the interpreter restriction, not JavaScript's standard constructor behavior, is the security boundary being bypassed.
+As a result, a permitted Python module reportedly exposes a route from ordinary attribute access to the JavaScript `Function` constructor and then to the worker's global scope. The security issue is the interpreter's failure to enforce its intended boundary, not JavaScript's normal constructor behavior.
 
-Relevant source locations include:
+I examined these source locations:
 
-| Source | Mechanism to review |
+| Source | Mechanism |
 |---|---|
-| `www/src/py_builtin_functions.js` | `$B.$getattr`, native backed attributes, and builtins evaluation |
+| `www/src/py_builtin_functions.js` | `$B.$getattr`, native-backed attributes, and builtins evaluation |
 | `www/src/js_objects.js` | `JSObj.__getattribute__` and raw JavaScript property access |
-| `www/src/py_import.js` | Import filters, package names, and module loading |
-| `www/src/builtin_modules.js` | `sys.modules` and interpreter object exposure |
+| `www/src/py_import.js` | Import restrictions and module loading |
+| `www/src/builtin_modules.js` | `sys.modules` and interpreter references |
 
-Source references should be checked against the pinned commit rather than assumed to have the same line numbers in other revisions or minified bundles.
+These references apply to the pinned source revision. I have not assumed the same line numbers or implementation in other versions.
 
 ## Related routes
 
-The research also describes module registry access through `sys.modules`, dotted package imports, `importlib`, and the `__BRYTHON__` interpreter reference. These are additional routes to the same worker environment.
+The research records also identify paths involving `sys.modules`, dotted imports, `importlib`, and the `__BRYTHON__` interpreter reference. I treat these as related routes into the same worker environment.
 
-A proposed `compile()` code object route behaved differently across local reproductions. Its portability remains unresolved and should not be presented as universally confirmed.
+A proposed `compile()` code-object route produced different results across local test environments. I am leaving its portability unresolved rather than claiming that it works in every build.
 
 ## Mitigation limits
 
-An attribute denylist can block known routes but may miss future interoperability paths. Restricting interpreter references and import behavior is useful defense in depth. Stronger isolation should remove privileged application resources from the untrusted execution environment and validate worker to page messages.
+In my assessment, an attribute denylist may block the known routes but could miss future interoperability paths. Restricting exposed interpreter references and imports can help, but stronger isolation would keep privileged application resources outside the untrusted worker and validate worker-to-page messages.
 
 ## Scope
 
-This finding concerns an application level Python interpreter boundary. It does not establish Chromium sandbox escape, operating system privilege escalation, backend command execution, or account takeover.
+I am reporting an **application-level Python interpreter boundary** issue. The evidence does not establish a Chromium sandbox escape, operating system privilege escalation, backend command execution, or account takeover.
