@@ -2,7 +2,7 @@
 
 **Status:** Provisional. I assess CMUlimatic as a reported interpreter isolation bypass. Its effect on privileged application operations has not been established.
 
-## Observed capabilities
+## Observed capabilities:
 
 The research records describe production checks T1 through T8. They indicate that restricted student Python could reach the Web Worker global scope and use several standard worker features.
 
@@ -19,7 +19,7 @@ The research records describe production checks T1 through T8. They indicate tha
 
 I treat these as capabilities reachable after the interpreter restriction was bypassed, not as eight separate vulnerabilities. Several are ordinary Web Worker features.
 
-## What I have not demonstrated
+## What I have not demonstrated:
 
 The evidence does not show teacher or student account takeover, unauthorized access to records, theft of the page's authentication token, persistent grade changes, backend code execution, or an escape from the browser or OS sandbox.
 
@@ -27,11 +27,11 @@ The frontend reportedly gets its API token from the main page's `localStorage`. 
 
 The client also appears to send submitted code to a backend autograding endpoint. That is consistent with server-side grading, although I cannot establish from the client code alone that all stored results are independently computed by the server.
 
-## Severity
+## Severity:
 
-**CVSS: Not assigned.** I do not think a score based on an assumed teacher takeover or grade forgery scenario would be justified by the current evidence.
+**CVSS:** Not assigned. I do not think a score based on an assumed teacher takeover or grade forgery scenario would be justified by the current evidence.
 
-## Questions for CMU
+## Questions for CMU:
 
 1. Can a trusted page handler perform privileged actions based on messages from a student code worker?
 2. Does any review workflow execute student code in another user's browser context?
