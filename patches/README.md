@@ -1,7 +1,7 @@
 # Patch Notes
 
-The tested `proposed-fix.diff` was not available in the reviewed research material. No patch has been reconstructed or presented as the original test artifact.
+I have not included a tested `proposed-fix.diff` because the original patch was not available in the research material I reviewed. I have not reconstructed a substitute and presented it as the tested artifact.
 
-The research describes candidate changes labeled A through G that address import checks, module visibility, interpreter references, compiled source evaluation, and JavaScript property lookup. These changes reportedly passed local tests, but the actual diff and regression results are needed before independent review.
+The research records describe candidate changes labeled A through G. They address import checks, module visibility, interpreter references, compiled-source evaluation, and JavaScript property lookup. The changes reportedly passed local regression tests, but I would need the exact diff and results to verify that claim independently.
 
-The `proposed-fix.diff` placeholder remains empty. Any included upstream Brython source must retain its original license terms.
+The `proposed-fix.diff` placeholder is intentionally empty. Any upstream Brython source included later must retain its original license terms.
