@@ -2,13 +2,13 @@
 
 > **Evidence notice:** I compiled this summary from research records and reported test outcomes. The original worker captures, complete harness code, local JSON matrices, downloaded production assets, and tested patch diff are not included here. Without them, the outcomes below are not independently reproducible from this repository alone.
 
-## Local reproduction
+## Local reproduction:
 
 The research involved two separate local environments running the pinned Brython fork with lockdown enabled. Both reportedly reproduced the permitted-module path to the worker global and access through the preloaded module registry.
 
 Another route using a compiled code object succeeded in one environment and failed in the other. I am leaving that difference unresolved. A proposed patched runtime also reportedly blocked known routes while preserving ordinary Python operations, but I have not included the full patch or regression matrix.
 
-## Reported production IDE checks
+## Reported production IDE checks:
 
 I reviewed the T1 through T8 test summaries and kept their observed outcomes separate from claims they do not support.
 
@@ -25,13 +25,13 @@ I reviewed the T1 through T8 test summaries and kept their observed outcomes sep
 
 The records describe bounded tests in the `/ide` runner. I have not independently checked the original logs, so I am treating these as **reported observations**.
 
-## Unverified downstream impact
+## Unverified downstream impact:
 
 I found no live demonstration in the supplied records of execution in a teacher's session, protected backend access, cross-user data exposure, stored grade changes, or privileged page-message handling.
 
 Local mock-application tests explored page messaging and potential grading behavior. A mock backend accepting client scores does not establish what CMU's production backend accepts. A separate print-popup HTML issue was examined during the broader research, but I am not presenting it as part of this Brython lockdown finding.
 
-## Evidence still needed
+## Evidence still needed:
 
 1. Original local harnesses and outputs
 2. Paired regression matrices for the unmodified and proposed patched runtime
